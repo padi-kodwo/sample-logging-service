@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+
+    <!-- this turns off the status logging logback does -->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
+    <!-- use springboot default log values -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+
+    <!-- use application properties  values -->
+    <springProperty scope="context" name="springAppName" source="spring.application.name" />
+    <springProperty scope="context" name="springAppVersion" source="spring.application.version" />
+    <contextName>${springAppName}</contextName>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <!-- Logstash server address -->
+        <destination>localhost:5044</destination>
+        <!-- Encoder to format the log messages as JSON -->
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+    </appender>
+
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <!-- Use profile-specific configurations (for dev, uat and prod) -->
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+        </root>
+    </springProfile>
+
+    <springProfile name="uat">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="LOGSTASH" />
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE" />
+            <appender-ref ref="LOGSTASH" />
+        </root>
+    </springProfile>
+
+    <springProfile name="test">
+        <logger name="co.terydin" level="DEBUG" />
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+</configuration>
